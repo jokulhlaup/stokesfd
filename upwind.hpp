@@ -9,20 +9,26 @@
 using namespace std;
 using namespace Eigen;
 
-template <size_i rows, size_i stages, size_f... cs>
+template <typename Derived, typename size_f, int n>
 struct rk {
-   std::array<size_f, (stages+1)*rows + rows*(rows+1)/2 > c = {cs};
-   std::array<EigenBase<Derived>&, rows> Ks;
-   EigenBase<Derived>& tmp;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+   Array<double, n, n+1> tableau;
+   std::vector<EigenBase<Derived>, n+1>  Ks;
+   EigenBase<Derived> tmp;
 
-   void update_Ks( EigenBase<Derived>& x, size_f h ) {
+   rk(Array<double, n, n+1> c, EigenBase<Derived>& x0) {
+      dims = x0.size();
+      tableau = c;
+      x = x0;
+      EigenBase<Derived> 
+
+   void update_Ks( EigenBase<Derived> x, size_f h ) {
       Ks[0]= h*f(t,x);
-      for (i=1; i<=rows; i++) {
-         auto k=(i-1)/2 + (i-1);
-         tmp.setZero();
-         for (j=1; j<i+1; j++) {
-            if (c[k+j] != 0)
-               tmp += c[k+j]*Ks[k];
+      for (i=0; i<n; i++) {
+      tmp.setzeros()
+         for (j=0; j<i+1; j++) {
+            if (tableau[k,j] != 0)
+               tmp += tableau[k,j]*Ks[k];
             }
          Ks[i] = h*f(t + c[k], x + tmp);
       }
