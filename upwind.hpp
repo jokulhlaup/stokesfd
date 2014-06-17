@@ -5,19 +5,37 @@
 #include <Eigen/Core>
 #include <time.h>
 #include <math.h>
+
 using namespace std;
 using namespace Eigen;
 
-template <size_i order, size_f... cs>
-class rk {
-   std::array<size_f, order + order*(order+1)/2> c = {cs};
-   std::array<EigenBase<Derived>&, order> Ks;
-   
-   void integrate( EigenBase<Derived>& x, size_f h ) {
+template <size_i rows, size_i stages, size_f... cs>
+struct rk {
+   std::array<size_f, (stages+1)*rows + rows*(rows+1)/2 > c = {cs};
+   std::array<EigenBase<Derived>&, rows> Ks;
+   EigenBase<Derived>& tmp;
+
+   void update_Ks( EigenBase<Derived>& x, size_f h ) {
       Ks[0]= h*f(t,x);
-      for (i=0; i<order; i++) {
-         {
-            
+      for (i=1; i<=rows; i++) {
+         auto k=(i-1)/2 + (i-1);
+         tmp.setZero();
+         for (j=1; j<i+1; j++) {
+            if (c[k+j] != 0)
+               tmp += c[k+j]*Ks[k];
+            }
+         Ks[i] = h*f(t + c[k], x + tmp);
+      }
+   }
+   
+   void integrate( EigenBase<Derived>& x, std::array<size_f, rows+1>& b) {
+      update_Ks(x,h);
+      tmp.setZeros();
+      for i=0:rows
+         x += b[i]*Ks[i];
+      }
+   
+   
       
 
 
